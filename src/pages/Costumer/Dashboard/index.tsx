@@ -4,17 +4,7 @@ import 'react-day-picker/lib/style.css';
 
 import { FiPower } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import {
-  Container,
-  Header,
-  HeaderContent,
-  HeaderLinkContent,
-  Profile,
-  Content,
-  Schedule,
-  Section,
-  Appointment,
-} from './styles';
+import { Container, Content, Schedule, Section, Appointment } from './styles';
 
 import logoImg from '../../../assets/logo.svg';
 import { useAuth } from '../../../hooks/auth';
@@ -22,11 +12,6 @@ import api, { apiRoutes } from '../../../services/api';
 import AppointmentModel from '../../../models/Appointment';
 import { addMinutes, subDays, addDays } from 'date-fns/esm';
 import { ptBR } from 'date-fns/locale';
-
-interface MonthAvailabilityItem {
-  day: number;
-  available: boolean;
-}
 
 const Dashboard: React.FC = () => {
   const { signOut, user } = useAuth();
@@ -37,7 +22,8 @@ const Dashboard: React.FC = () => {
         `/costumer/${user.id}/appointments`,
         {
           params: {
-            from: format(new Date(), 'yyyy-MM-dd'),
+            from: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
+            // froms: format(new Date(), 'yyyy-MM-dd'),
             to: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
           },
         },
@@ -81,31 +67,6 @@ const Dashboard: React.FC = () => {
   }, [appointmentsFormatted]);
   return (
     <Container>
-      <Header>
-        <HeaderContent>
-          <img src={logoImg} alt="GoBarber" />
-
-          <Profile>
-            <img src={user.perfilImageURL || ''} alt={user.name} />
-
-            <div>
-              <span>Bem-vindo,</span>
-              <Link to="/profile">
-                <strong>{user.name}</strong>
-              </Link>
-            </div>
-          </Profile>
-          <HeaderLinkContent>
-            <Link to="/costumer/dashboard">Marcar Horário</Link>
-            <Link to="/costumer/dashboard">Inicio</Link>
-          </HeaderLinkContent>
-
-          <button type="button" onClick={signOut}>
-            <FiPower />
-          </button>
-        </HeaderContent>
-      </Header>
-
       <Content>
         <Schedule>
           <h1>Horários marcados</h1>
