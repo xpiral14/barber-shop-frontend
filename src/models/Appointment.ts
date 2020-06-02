@@ -1,4 +1,5 @@
 import User from './User';
+import Service from './Service';
 
 export default interface Appointment {
   id: number;
@@ -6,10 +7,14 @@ export default interface Appointment {
   serviceId: number;
   barberId: number;
   costumerId: number;
-  appointmentAt: string;
+  date: string;
+  time: number;
   canceledAt?: string;
   createdAt: string;
   updatedAt: string;
   barber: User;
+  service: Service;
   costumer: User;
+  dateTime: Date;
+  hourFormatted?:string
 }
