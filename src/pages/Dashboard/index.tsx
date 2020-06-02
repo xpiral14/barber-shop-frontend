@@ -1,22 +1,12 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import {
-  isToday,
-  format,
-  parseISO,
-  isAfter,
-  addMinutes,
-} from 'date-fns';
+import { isToday, format, parseISO, isAfter, addMinutes } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 
-import { FiPower, FiClock } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { FiClock } from 'react-icons/fi';
 import {
   Container,
-  Header,
-  HeaderContent,
-  Profile,
   Content,
   Schedule,
   NextAppointment,
@@ -25,7 +15,6 @@ import {
   Calendar,
 } from './styles';
 
-import logoImg from '../../assets/logo.svg';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
 import AppointmentModel from '../../models/Appointment';
@@ -43,7 +32,7 @@ const Dashboard: React.FC = () => {
   >([]);
   const [appointments, setAppointments] = useState<AppointmentModel[]>([]);
 
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
     if (modifiers.available && !modifiers.disabled) {
@@ -131,27 +120,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <Container>
-      <Header>
-        <HeaderContent>
-          <img src={logoImg} alt="GoBarber" />
-
-          <Profile>
-            <img src={user.perfilImageURL || ''} alt={user.name} />
-
-            <div>
-              <span>Bem-vindo,</span>
-              <Link to="/profile">
-                <strong>{user.name}</strong>
-              </Link>
-            </div>
-          </Profile>
-
-          <button type="button" onClick={signOut}>
-            <FiPower />
-          </button>
-        </HeaderContent>
-      </Header>
-
       <Content>
         <Schedule>
           <h1>Horários agendados</h1>
@@ -182,7 +150,7 @@ const Dashboard: React.FC = () => {
           <Section>
             <strong>Manhã</strong>
 
-            {!sectionAppointments.morning.length? (
+            {!sectionAppointments.morning.length ? (
               <p>Nenhum agendamento neste período</p>
             ) : (
               sectionAppointments.morning.map((appointment) => {
@@ -195,13 +163,12 @@ const Dashboard: React.FC = () => {
 
                     <div>
                       <div>
+                        <img
+                          src={appointment.costumer.perfilImageURL || ''}
+                          alt={appointment.costumer.name}
+                        />
 
-                      <img
-                        src={appointment.costumer.perfilImageURL || ''}
-                        alt={appointment.costumer.name}
-                      />
-
-                      <strong>{appointment.costumer.name}</strong>
+                        <strong>{appointment.costumer.name}</strong>
                       </div>
                       <strong>{appointment.service.name}</strong>
                     </div>

@@ -2,19 +2,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { isAfter, format, parseISO, isBefore } from 'date-fns';
 import 'react-day-picker/lib/style.css';
 
-import { FiPower } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
 import { Container, Content, Schedule, Section, Appointment } from './styles';
 
-import logoImg from '../../../assets/logo.svg';
 import { useAuth } from '../../../hooks/auth';
-import api, { apiRoutes } from '../../../services/api';
+import api from '../../../services/api';
 import AppointmentModel from '../../../models/Appointment';
 import { addMinutes, subDays, addDays } from 'date-fns/esm';
 import { ptBR } from 'date-fns/locale';
 
 const Dashboard: React.FC = () => {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentModel[]>([]);
   useEffect(() => {
     async function getAppointments() {
@@ -31,7 +28,7 @@ const Dashboard: React.FC = () => {
       setAppointments(appointments.data);
     }
     getAppointments();
-  }, []);
+  }, [user.id]);
   const appointmentsFormatted = useMemo(() => {
     return appointments.map((appointment) => {
       let dateTime = addMinutes(parseISO(appointment.date), appointment.time);
@@ -64,7 +61,7 @@ const Dashboard: React.FC = () => {
         isBefore(appointment.dateTime, new Date()),
       ),
     };
-  }, [appointmentsFormatted]);
+  }, [appointmentsFormatted, nextAppointment]);
   return (
     <Container>
       <Content>
