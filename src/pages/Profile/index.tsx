@@ -150,7 +150,7 @@ const Profile: React.FC = () => {
           onSubmit={handleSubmit}
         >
           <AvatarInput>
-            <img src={user.avatar_url} alt={user.name} />
+            <img src={user.perfilImageURL} alt={user.name} />
             <label htmlFor="avatar">
               <FiCamera />
 
