@@ -10,6 +10,8 @@ import ResetPassword from '../pages/ResetPassword';
 
 import Dashboard from '../pages/Dashboard';
 import Profile from '../pages/Profile';
+import { UserType } from '../models/User';
+import DashBoardCostumer from '../pages/Costumer/Dashboard';
 
 const Routes: React.FC = () => (
   <Switch>
@@ -18,8 +20,18 @@ const Routes: React.FC = () => (
     <Route path="/forgot-password" component={ForgotPassword} />
     <Route path="/reset-password" component={ResetPassword} />
 
-    <Route path="/dashboard" component={Dashboard} isPrivate />
-    <Route path="/profile" component={Profile} isPrivate />
+    <Route
+      path="/barber/dashboard"
+      component={Dashboard}
+      authTypes={[UserType.BARBER]}
+    />
+    <Route path="/profile" component={Profile} authTypes={[UserType.BARBER]} />
+
+    <Route
+      path="/costumer/dashboard"
+      component={DashBoardCostumer}
+      authTypes={[UserType.COSTUMER]}
+    />
   </Switch>
 );
 

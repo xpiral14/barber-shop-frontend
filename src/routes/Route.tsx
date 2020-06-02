@@ -6,33 +6,46 @@ import {
 } from 'react-router-dom';
 
 import { useAuth } from '../hooks/auth';
+import { UserType } from '../models/User';
+import baseUserRoute from '../config/defaultRoutes';
 
 interface RouteProps extends ReactDOMRouteProps {
-  isPrivate?: boolean;
   component: React.ComponentType;
+  authTypes?: UserType[];
 }
 
 const Route: React.FC<RouteProps> = ({
-  isPrivate = false,
+  authTypes,
   component: Component,
   ...rest
 }) => {
   const { user } = useAuth();
-
   return (
     <ReactDOMRoute
       {...rest}
       render={({ location }) => {
-        return isPrivate === !!user ? (
-          <Component />
-        ) : (
-          <Redirect
-            to={{
-              pathname: isPrivate ? '/' : '/dashboard',
-              state: { from: location },
-            }}
-          />
-        );
+        if (!authTypes?.length && !user) return <Component />;
+        if (!user && authTypes?.length)
+          return (
+            <Redirect
+              to={{
+                pathname: '/',
+                state: { from: location },
+              }}
+            />
+          );
+          // se a rota é publica e há um usuário logado
+        if (user && !authTypes?.length)
+          return (
+            <Redirect
+              to={{
+                pathname: baseUserRoute[user.userType.id],
+                state: { from: location },
+              }}
+            />
+          );
+        
+        return <Component />;
       }}
     />
   );
