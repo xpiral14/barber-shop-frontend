@@ -1,11 +1,18 @@
-import React, { createContext, useCallback, useState, useContext } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useState,
+  useContext,
+  useEffect,
+} from 'react';
 
 import api from '../services/api';
 import User from '../models/User';
 
 interface AuthState {
   token: string;
-  barber: User;
+  // barber: User;
+  user: User;
 }
 
 interface SignInCredencials {
@@ -15,65 +22,80 @@ interface SignInCredencials {
 
 interface AuthContextData {
   user: User;
-  signIn(credentials: SignInCredencials): Promise<void>;
+  signIn(credentials: SignInCredencials): Promise<AuthState>;
   signOut(): void;
   updateUser(user: User): void;
+  setContextData(data: AuthState): void;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export const AuthProvider: React.FC = ({ children }) => { 
+export const AuthProvider: React.FC = ({ children }) => {
   const [data, setData] = useState<AuthState>(() => {
-    const token = localStorage.getItem('@GoBarber:token');
-    const barber = localStorage.getItem('@GoBarber:barber');
-
-    if (token && barber) {
+    const token = localStorage.getItem('@$:token');
+    const user = localStorage.getItem('$BARBERSHOP:user');
+    if (token && user) {
       api.defaults.headers.authorization = `Bearer ${token}`;
 
-      return { token, barber: JSON.parse(barber) };
+      return { token, user: JSON.parse(user) };
     }
 
     return {} as AuthState;
   });
 
+  useEffect(() => {
+    const token = localStorage.getItem('$BARBERSHOP:token');
+    const user = localStorage.getItem('$BARBERSHOP:user');
+    if (token && user) {
+      api.defaults.headers.authorization = `Bearer ${token}`;
+
+      setData({ token, user: JSON.parse(user) });
+    }
+  }, []);
   const signIn = useCallback(async ({ email, password }) => {
-    const response = await api.post<AuthState>('/session/barber', {
+    const response = await api.post<AuthState>('/user/sign-in', {
       email,
       password,
     });
 
-    const { token, barber } = response.data;
+    const { token, user } = response.data;
 
-    localStorage.setItem('@GoBarber:token', token);
-    localStorage.setItem('@GoBarber:user', JSON.stringify(barber));
+    localStorage.setItem('$BARBERSHOP:token', token);
+    localStorage.setItem('$BARBERSHOP:user', JSON.stringify(user));
 
     api.defaults.headers.authorization = `Bearer ${token}`;
 
-    setData({ token, barber });
+    setData({ token, user });
+    return response.data;
   }, []);
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@GoBarber:token');
-    localStorage.removeItem('@GoBarber:user');
+    const confirmed = window.confirm('Você tem certeza que deseja sair?');
+    if (confirmed) {
+      localStorage.removeItem('$BARBERSHOP:token');
+      localStorage.removeItem('$BARBERSHOP:user');
 
-    setData({} as AuthState);
+      setData({} as AuthState);
+    }
   }, []);
 
   const updateUser = useCallback(
-    (barber: User) => {
-      localStorage.setItem('@GoBarber:user', JSON.stringify(barber));
+    (user: User) => {
+      localStorage.setItem('$BARBERSHOP:user', JSON.stringify(user));
 
       setData({
         token: data.token,
-        barber,
+        user,
       });
     },
     [data.token],
   );
-
+  const setContextData = (data: AuthState) => {
+    setData(data);
+  };
   return (
     <AuthContext.Provider
-      value={{ user: data.barber, signIn, signOut, updateUser }}
+      value={{ user: data.user, signIn, signOut, updateUser, setContextData }}
     >
       {children}
     </AuthContext.Provider>
