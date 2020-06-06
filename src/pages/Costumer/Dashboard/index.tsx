@@ -9,28 +9,45 @@ import api from '../../../services/api';
 import AppointmentModel from '../../../models/Appointment';
 import { addMinutes, subDays, addDays } from 'date-fns/esm';
 import { ptBR } from 'date-fns/locale';
+import { useToast } from '../../../hooks/toast';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const [appointments, setAppointments] = useState<AppointmentModel[]>([]);
+  const toast = useToast();
+  const [appointments, setAppointments] = useState<AppointmentModel[] | null>(
+    null,
+  );
   useEffect(() => {
     async function getAppointments() {
-      const appointments = await api.get<AppointmentModel[]>(
-        `/costumer/${user.id}/appointments`,
-        {
-          params: {
-            from: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
-            // froms: format(new Date(), 'yyyy-MM-dd'),
-            to: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+      try {
+        const appointments = await api.get<AppointmentModel[]>(
+          `/costumer/${user.id}/appointment`,
+          {
+            params: {
+              from: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
+              // froms: format(new Date(), 'yyyy-MM-dd'),
+              to: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+            },
           },
-        },
-      );
-      setAppointments(appointments.data);
+        );
+        setAppointments(appointments.data);
+      } catch (error) {
+        if (error?.response?.data) {
+          error.response.data.forEach((err: string) => {
+            toast.addToast({
+              title: 'Erro',
+              description: err,
+              type: 'error',
+              
+            });
+          });
+        }
+      }
     }
     getAppointments();
-  }, [user.id]);
+  }, [user.id, toast]);
   const appointmentsFormatted = useMemo(() => {
-    return appointments.map((appointment) => {
+    return appointments?.map((appointment) => {
       let dateTime = addMinutes(parseISO(appointment.date), appointment.time);
       return {
         ...appointment,
@@ -44,7 +61,7 @@ const Dashboard: React.FC = () => {
 
   const nextAppointment = useMemo(
     () =>
-      appointmentsFormatted.find((appointment) =>
+      appointmentsFormatted?.find((appointment) =>
         isAfter(appointment.dateTime, new Date()),
       ),
     [appointmentsFormatted],
@@ -52,12 +69,12 @@ const Dashboard: React.FC = () => {
 
   const sectionAppointment = useMemo(() => {
     return {
-      nextAppointments: appointmentsFormatted.filter(
+      nextAppointments: appointmentsFormatted?.filter(
         (appointment) =>
           isAfter(appointment.dateTime, new Date()) &&
           nextAppointment?.id !== appointment.id,
       ),
-      previousAppointments: appointmentsFormatted.filter((appointment) =>
+      previousAppointments: appointmentsFormatted?.filter((appointment) =>
         isBefore(appointment.dateTime, new Date()),
       ),
     };
@@ -67,7 +84,7 @@ const Dashboard: React.FC = () => {
       <Content>
         <Schedule>
           <h1>Horários marcados</h1>
-          {!!nextAppointment && (
+          {nextAppointment !== undefined && (
             <Section>
               <strong>Próximo encontro</strong>
               <Appointment>
@@ -81,11 +98,11 @@ const Dashboard: React.FC = () => {
               </Appointment>
             </Section>
           )}
-          {sectionAppointment.nextAppointments.length && (
+          {sectionAppointment.nextAppointments?.length && (
             <Section>
               <strong>Próximo horários marcados</strong>
 
-              {sectionAppointment.nextAppointments.map((appointment) => (
+              {sectionAppointment?.nextAppointments.map((appointment) => (
                 <Appointment>
                   <span>{appointment.formattedDate}</span>
 
@@ -98,7 +115,7 @@ const Dashboard: React.FC = () => {
               ))}
             </Section>
           )}
-          {sectionAppointment.previousAppointments.length && (
+          {sectionAppointment.previousAppointments?.length && (
             <Section>
               <strong>Os últimos horários marcados</strong>
 
