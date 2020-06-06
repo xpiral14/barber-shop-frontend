@@ -3,7 +3,7 @@ import React, {
   useCallback,
   useState,
   useContext,
-  useEffect,
+  useLayoutEffect,
 } from 'react';
 
 import api from '../services/api';
@@ -43,15 +43,29 @@ export const AuthProvider: React.FC = ({ children }) => {
     return {} as AuthState;
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem('$BARBERSHOP:token');
-    const user = localStorage.getItem('$BARBERSHOP:user');
-    if (token && user) {
-      api.defaults.headers.authorization = `Bearer ${token}`;
+  const fastSignOut = useCallback(() => {
+    localStorage.removeItem('$BARBERSHOP:token');
+    localStorage.removeItem('$BARBERSHOP:user');
 
-      setData({ token, user: JSON.parse(user) });
-    }
+    setData({} as AuthState);
   }, []);
+
+  useLayoutEffect(() => {
+    async function getData() {
+      const token = localStorage.getItem('$BARBERSHOP:token');
+      const user = localStorage.getItem('$BARBERSHOP:user');
+      if (token && user) {
+        api.defaults.headers.authorization = `Bearer ${token}`;
+        try {
+          const { data } = await api.get<User>('/user/profile');
+          setData({ token, user: data });
+        } catch (error) {
+          fastSignOut();
+        }
+      }
+    }
+    getData();
+  }, [fastSignOut]);
   const signIn = useCallback(async ({ email, password }) => {
     const response = await api.post<AuthState>('/user/sign-in', {
       email,
@@ -68,7 +82,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     setData({ token, user });
     return response.data;
   }, []);
-
+ 
   const signOut = useCallback(() => {
     const confirmed = window.confirm('Você tem certeza que deseja sair?');
     if (confirmed) {
