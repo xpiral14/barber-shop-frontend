@@ -3,6 +3,10 @@ import styled from 'styled-components';
 export const HeaderContainer = styled.header`
   padding: 32px 0;
   background: #28262e;
+
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
 `;
 export const HeaderContent = styled.div`
   max-width: 1120px;
@@ -26,6 +30,11 @@ export const HeaderContent = styled.div`
       height: 20px;
     }
   }
+  @media screen and (max-width: 768px) {
+    > img {
+      display: none;
+    }
+  }
 `;
 export const HeaderLinkContent = styled.div`
   flex: 1;
@@ -40,6 +49,9 @@ export const HeaderLinkContent = styled.div`
   }
   a + a {
     margin-right: 1.5rem;
+  }
+  @media screen and (max-width: 768px) {
+    margin-right: 0;
   }
 `;
 export const Profile = styled.div`
@@ -71,5 +83,8 @@ export const Profile = styled.div`
         opacity: 0.8;
       }
     }
+  }
+  @media screen and (max-width: 768px) {
+    margin-left: 0;
   }
 `;

@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ user, links }) => {
         {links && (
           <HeaderLinkContent>
             {links.map(({ name, to }) => (
-              <Link to={to}>{name}</Link>
+              <Link to={to} key = {name}>{name}</Link>
             ))}
           </HeaderLinkContent>
         )}

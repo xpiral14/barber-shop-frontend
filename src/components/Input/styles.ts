@@ -55,7 +55,7 @@ export const Container = styled.div<ContainerProps>`
 
     /* Fazendo o autocomplete do input ter a mesma cor do input */
     &:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0px 1000px #232129 inset;
+      /* -webkit-box-shadow: 0 0 0px 1000px #232129 inset; */
       -webkit-text-fill-color: #f4ede8;
     }
   }
