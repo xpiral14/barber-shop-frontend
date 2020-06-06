@@ -7,7 +7,7 @@ export enum UserType {
   COSTUMER = 2,
 }
 export default interface User {
-  id: string;
+  id: number;
   userTypeId: UserType;
   companyId: number;
   userType: UserTypeModel;
