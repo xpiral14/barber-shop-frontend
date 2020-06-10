@@ -16,6 +16,7 @@
     "axios": "^0.19.2",
     "date-fns": "^2.14.0",
     "date-fns-timezone": "^0.1.4",
+    "date-fns-tz": "^1.0.10",
     "polished": "^3.5.2",
     "react": "^16.13.1",
     "react-day-picker": "^7.4.8",

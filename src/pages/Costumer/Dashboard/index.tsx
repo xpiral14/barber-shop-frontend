@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { isAfter, format, parseISO, isBefore } from 'date-fns';
+import { isAfter, parseISO, isBefore } from 'date-fns';
 import 'react-day-picker/lib/style.css';
 
 import { Container, Content, Schedule, Section, Appointment } from './styles';
@@ -10,6 +10,9 @@ import AppointmentModel from '../../../models/Appointment';
 import { addMinutes, subDays, addDays } from 'date-fns/esm';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '../../../hooks/toast';
+import { zonedTimeToUtc, format } from 'date-fns-tz';
+import getTimeZone from '../../../utils/getTimeZone';
+import { utcToZonedTime } from 'date-fns-tz/esm';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -24,12 +27,15 @@ const Dashboard: React.FC = () => {
           `/costumer/${user.id}/appointment`,
           {
             params: {
-              from: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
+              from: format(subDays(new Date(), 7), 'yyyy-MM-dd', {
+                timeZone: getTimeZone(),
+              }),
               // froms: format(new Date(), 'yyyy-MM-dd'),
               to: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
             },
           },
         );
+        console.log(appointments.data);
         setAppointments(appointments.data);
       } catch (error) {
         if (error?.response?.data) {
@@ -38,7 +44,6 @@ const Dashboard: React.FC = () => {
               title: 'Erro',
               description: err,
               type: 'error',
-              
             });
           });
         }
@@ -48,7 +53,11 @@ const Dashboard: React.FC = () => {
   }, [user.id, toast]);
   const appointmentsFormatted = useMemo(() => {
     return appointments?.map((appointment) => {
-      let dateTime = addMinutes(parseISO(appointment.date), appointment.time);
+      let dateTime = addMinutes(
+        parseISO(appointment.date),
+        appointment.time + 180,
+      );
+
       return {
         ...appointment,
         dateTime,

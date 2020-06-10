@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
       );
 
       const appointmentsFormatted = data.map((appointment) => {
-        let dateTime = addMinutes(parseISO(appointment.date), appointment.time);
+        let dateTime = addMinutes(parseISO(appointment.date), appointment.time + 180);
         return {
           ...appointment,
           dateTime,

@@ -1,10 +1,11 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { FiArrowLeft, FiMail, FiUser } from 'react-icons/fi';
+import { FiArrowLeft, FiMail, FiUser, FiPhone } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { Link, useHistory } from 'react-router-dom';
-
+import { utcToZonedTime } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
 import api from '../../../services/api';
 import { useToast } from '../../../hooks/toast';
 import getValidationErrors from '../../../utils/getValidationErrors';
@@ -16,6 +17,9 @@ import { Container, Content } from './styles';
 import { useAuth } from '../../../hooks/auth';
 import Select, { SelectOption } from '../../../components/Select';
 import { COSTUMER } from '../../../constants/userTypes';
+import getTimeZone from '../../../utils/getTimeZone';
+import { FaTransgenderAlt } from 'react-icons/fa';
+
 // import { FaTransgenderAlt } from 'react-icons/fa';
 
 export interface ProfileFormData {
@@ -28,6 +32,7 @@ export interface ProfileFormData {
 export interface CostumerFormData {
   name: string;
   email: string;
+  phone: string;
   genderId: number;
   userTypeId?: number;
 }
@@ -50,7 +55,9 @@ const CreateCostumer: React.FC = () => {
     async function getGenders() {
       const { data } = await api.get<GenderData[]>('/gender');
       setGenders(
-        data.map((gender) => ({ value: gender.id, label: gender.name })),
+        data.map((gender) => {
+          return { value: gender.id, label: gender.name };
+        }),
       );
     }
     getGenders();
@@ -65,6 +72,7 @@ const CreateCostumer: React.FC = () => {
           email: Yup.string()
             .required('E-mail obrigatório')
             .email('Digite um e-mail valido'),
+          phone:  Yup.string().matches(/^(?:(?:\+|00)?(55)\s?)?(?:\(?([1-9][0-9])\)?\s?)?(?:((?:9\d|[2-9])\d{3})\-?(\d{4}))$/, "Insira um telefone válido"),
           genderId: Yup.number()
             .required('Gênero obrigatório')
             .typeError('Escolha um gênero'),
@@ -111,7 +119,6 @@ const CreateCostumer: React.FC = () => {
     },
     [addToast, history, user.id],
   );
-
   return (
     <Container>
       <header>
@@ -128,9 +135,9 @@ const CreateCostumer: React.FC = () => {
 
           <Input name="name" icon={FiUser} placeholder="Nome" />
           <Input name="email" icon={FiMail} placeholder="E-mail" />
-
+          <Input name="phone" icon={FiPhone} placeholder="Número do celular" />
           <Select
-            // icon = {FaTransgenderAlt}
+            // icon={FaTransgenderAlt}
             name="genderId"
             options={genders}
             placeholder="Selecione o gênero"

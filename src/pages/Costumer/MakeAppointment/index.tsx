@@ -10,17 +10,15 @@ import {
 import User from '../../../models/User';
 import Service from '../../../models/Service';
 import api from '../../../services/api';
-import {
-  FaArrowRight,
-  FaArrowLeft,
-  FaCalendarCheck,
-} from 'react-icons/fa';
+import { FaArrowRight, FaArrowLeft, FaCalendarCheck } from 'react-icons/fa';
 import { addMinutes, format, addDays } from 'date-fns';
 import { useAuth } from '../../../hooks/auth';
 import { useToast, ToastMessage } from '../../../hooks/toast';
 import { useHistory } from 'react-router-dom';
 import Calendar from '../../../components/Calendar';
 import DayPicker from 'react-day-picker';
+import { zonedTimeToUtc } from 'date-fns-tz';
+import getTimeZone from '../../../utils/getTimeZone';
 const MakeAppointment: React.FC = (props) => {
   const [service, setService] = useState<number | null>(null);
   const [services, setServices] = useState<Service[]>();
@@ -95,8 +93,11 @@ const MakeAppointment: React.FC = (props) => {
         barberId: barber,
         serviceId: service,
         costumerId: user.id,
-        date: format(selectedDay, 'yyyy-MM-dd'),
-        time: appointment && appointment + 180,
+        date: format(
+          zonedTimeToUtc(new Date(), getTimeZone()),
+          'yyyy-MM-dd hh:mm:ss',
+        ),
+        time: appointment && appointment,
       });
       const t: ToastMessage = {
         id: '1',

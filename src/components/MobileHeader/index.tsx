@@ -37,7 +37,7 @@ const MobileHeader: React.FC<HeaderProps> = ({ user, links }) => {
       </HeaderContent>
       <Menu show={isVisible}>
         {links?.map((link) => (
-          <div>
+          <div key = {link.name}>
             <Link to={link.to} key={link.name}>
               {link.name}
             </Link>
